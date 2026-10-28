@@ -1,0 +1,28 @@
+# (Tùy chọn) Render Blueprint: mô tả hạ tầng bằng code.
+# Báo cáo của nhóm triển khai thủ công qua Dashboard để ghi lại từng bước,
+# file này chỉ để tham khảo/mở rộng (Infrastructure as Code).
+databases:
+  - name: audiohub-db
+    plan: free
+    region: singapore
+    databaseName: audiohub
+    user: audiohub_user
+
+services:
+  - type: web
+    name: audiohub-store
+    runtime: node
+    plan: free
+    region: singapore
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: audiohub-db
+          property: connectionString
+      - key: NODE_ENV
+        value: production
+      - key: AUTO_DB_INIT
+        value: "true"

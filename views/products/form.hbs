@@ -1,0 +1,72 @@
+<div class="page-head">
+  <h1>{{title}}</h1>
+  <a class="btn btn-ghost" href="/products">← Về danh sách</a>
+</div>
+
+{{#if errors.length}}
+<div class="alert alert-err">
+  <strong>Vui lòng kiểm tra lại:</strong>
+  <ul>
+    {{#each errors}}<li>{{this}}</li>{{/each}}
+  </ul>
+</div>
+{{/if}}
+
+<form class="card form" action="{{action}}" method="post">
+  <div class="form-grid">
+    <label>Mã SKU *
+      <input type="text" name="sku" value="{{p.sku}}" maxlength="40" required placeholder="VD: SNY-WH1000XM5">
+    </label>
+    <label>Tên sản phẩm *
+      <input type="text" name="name" value="{{p.name}}" maxlength="200" required placeholder="VD: Sony WH-1000XM5">
+    </label>
+
+    <label>Danh mục *
+      <select name="category_id" required>
+        <option value="">-- Chọn danh mục --</option>
+        {{#each categories}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>{{/each}}
+      </select>
+    </label>
+    <label>Thương hiệu *
+      <select name="brand_id" required>
+        <option value="">-- Chọn thương hiệu --</option>
+        {{#each brands}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>{{/each}}
+      </select>
+    </label>
+
+    <label>Giá bán (VND) *
+      <input type="number" name="price" value="{{p.price}}" min="0" step="1" required placeholder="VD: 7490000">
+    </label>
+    <label>Tồn kho *
+      <input type="number" name="stock" value="{{p.stock}}" min="0" step="1" required>
+    </label>
+
+    <label>Kiểu kết nối
+      <select name="connection_type">
+        {{#each connectionTypes}}<option value="{{name}}" {{#if selected}}selected{{/if}}>{{name}}</option>{{/each}}
+      </select>
+    </label>
+    <label>Đáp tuyến tần số
+      <input type="text" name="frequency_response" value="{{p.frequency_response}}" maxlength="60" placeholder="VD: 4 Hz - 40 kHz">
+    </label>
+
+    <label>Trở kháng (Ω)
+      <input type="number" name="impedance_ohm" value="{{p.impedance_ohm}}" min="1" step="1" placeholder="VD: 32">
+    </label>
+    <label>Kích thước driver (mm)
+      <input type="number" name="driver_size_mm" value="{{p.driver_size_mm}}" min="1" step="1" placeholder="VD: 40">
+    </label>
+
+    <label class="span-2">Link ảnh (tùy chọn)
+      <input type="url" name="image_url" value="{{p.image_url}}" placeholder="https://...">
+    </label>
+    <label class="span-2">Mô tả
+      <textarea name="description" rows="4" placeholder="Mô tả ngắn về sản phẩm...">{{p.description}}</textarea>
+    </label>
+  </div>
+
+  <div class="form-actions">
+    <button class="btn btn-accent" type="submit">{{submitLabel}}</button>
+    <a class="btn btn-ghost" href="/products">Hủy</a>
+  </div>
+</form>

@@ -1,0 +1,76 @@
+<div class="page-head">
+  <h1>Sản phẩm</h1>
+  <a class="btn btn-accent" href="/products/new">+ Thêm sản phẩm</a>
+</div>
+
+{{#if flash}}<div class="alert alert-ok">{{flash}}</div>{{/if}}
+
+<form class="search-bar" action="/products" method="get">
+  <input type="search" name="q" value="{{q}}" placeholder="Tìm theo tên, thương hiệu hoặc mã SKU...">
+  <select name="category">
+    <option value="">Tất cả danh mục</option>
+    {{#each categories}}
+    <option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>
+    {{/each}}
+  </select>
+  <button class="btn" type="submit">Tìm kiếm</button>
+  {{#if hasFilter}}<a class="btn btn-ghost" href="/products">Xóa bộ lọc</a>{{/if}}
+</form>
+
+<p class="muted">
+  {{#if hasFilter}}Tìm thấy <strong>{{total}}</strong> sản phẩm phù hợp{{#if q}} với “{{q}}”{{/if}}.{{else}}Tổng cộng <strong>{{total}}</strong> sản phẩm.{{/if}}
+</p>
+
+{{#if products.length}}
+<div class="table-wrap">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>SKU</th>
+        <th>Sản phẩm</th>
+        <th>Danh mục</th>
+        <th>Kết nối</th>
+        <th class="num">Giá</th>
+        <th class="num">Tồn</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each products}}
+      <tr>
+        <td><code>{{sku}}</code></td>
+        <td>
+          <a href="/products/{{id}}"><strong>{{name}}</strong></a>
+          <div class="muted small">{{brand_name}}</div>
+        </td>
+        <td>{{category_name}}</td>
+        <td>{{connection_type}}</td>
+        <td class="num">{{formatPrice price}}</td>
+        <td class="num">
+          {{#if (isLowStock stock)}}<span class="badge badge-warn">{{stock}}</span>{{else}}{{stock}}{{/if}}
+        </td>
+        <td class="actions">
+          <a class="btn btn-sm btn-ghost" href="/products/{{id}}/edit">Sửa</a>
+          <form action="/products/{{id}}/delete" method="post" onsubmit="return confirm('Bạn chắc chắn muốn xóa sản phẩm này?');">
+            <button class="btn btn-sm btn-danger" type="submit">Xóa</button>
+          </form>
+        </td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</div>
+
+{{#if totalPages}}
+<nav class="pager">
+  {{#if hasPrev}}<a class="btn btn-ghost btn-sm" href="{{prevUrl}}">← Trước</a>{{/if}}
+  <span class="muted">Trang {{page}} / {{totalPages}}</span>
+  {{#if hasNext}}<a class="btn btn-ghost btn-sm" href="{{nextUrl}}">Sau →</a>{{/if}}
+</nav>
+{{/if}}
+{{else}}
+<div class="card empty">
+  <p>Không tìm thấy sản phẩm nào.</p>
+  <a class="btn" href="/products/new">Thêm sản phẩm mới</a>
+</div>
+{{/if}}

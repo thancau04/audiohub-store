@@ -1,0 +1,70 @@
+<h1>Tổng quan cửa hàng</h1>
+
+<section class="stats">
+  <div class="stat">
+    <div class="stat-label">Số sản phẩm</div>
+    <div class="stat-value">{{formatNumber stats.total_products}}</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Tổng tồn kho (chiếc)</div>
+    <div class="stat-value">{{formatNumber stats.total_stock}}</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Giá trị tồn kho</div>
+    <div class="stat-value">{{formatPrice stats.stock_value}}</div>
+  </div>
+  <div class="stat {{#if stats.low_stock}}stat-warn{{/if}}">
+    <div class="stat-label">Sắp hết hàng (≤ 5)</div>
+    <div class="stat-value">{{stats.low_stock}}</div>
+  </div>
+</section>
+
+<form class="search-bar" action="/products" method="get">
+  <input type="search" name="q" placeholder="Tìm nhanh theo tên, thương hiệu hoặc mã SKU...">
+  <button class="btn" type="submit">Tìm kiếm</button>
+</form>
+
+<div class="grid-2">
+  <section class="card">
+    <h2>Sản phẩm mới thêm</h2>
+    {{#if latest.length}}
+    <table class="table">
+      <thead><tr><th>Sản phẩm</th><th>Hãng</th><th class="num">Giá</th></tr></thead>
+      <tbody>
+        {{#each latest}}
+        <tr>
+          <td><a href="/products/{{id}}">{{name}}</a></td>
+          <td>{{brand_name}}</td>
+          <td class="num">{{formatPrice price}}</td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+    {{else}}
+    <p class="muted">Chưa có sản phẩm nào.</p>
+    {{/if}}
+  </section>
+
+  <section class="card">
+    <h2>Cần nhập thêm hàng</h2>
+    {{#if lowStock.length}}
+    <ul class="list">
+      {{#each lowStock}}
+      <li>
+        <a href="/products/{{id}}">{{name}}</a>
+        <span class="badge badge-warn">còn {{stock}}</span>
+      </li>
+      {{/each}}
+    </ul>
+    {{else}}
+    <p class="muted">Tất cả sản phẩm đều còn đủ hàng.</p>
+    {{/if}}
+
+    <h2 class="mt">Theo danh mục</h2>
+    <ul class="list">
+      {{#each byCategory}}
+      <li>{{name}} <span class="badge">{{n}}</span></li>
+      {{/each}}
+    </ul>
+  </section>
+</div>

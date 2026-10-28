@@ -1,0 +1,44 @@
+<div class="page-head">
+  <h1>{{p.name}}</h1>
+  <div class="head-actions">
+    <a class="btn btn-ghost" href="/products">← Danh sách</a>
+    <a class="btn" href="/products/{{p.id}}/edit">Sửa</a>
+    <form action="/products/{{p.id}}/delete" method="post" onsubmit="return confirm('Xóa sản phẩm này?');">
+      <button class="btn btn-danger" type="submit">Xóa</button>
+    </form>
+  </div>
+</div>
+
+{{#if flash}}<div class="alert alert-ok">{{flash}}</div>{{/if}}
+
+<div class="detail">
+  <div class="detail-image">
+    {{#if p.image_url}}
+    <img src="{{p.image_url}}" alt="{{p.name}}">
+    {{else}}
+    <div class="placeholder">🎧</div>
+    {{/if}}
+  </div>
+
+  <div class="card">
+    <p class="price">{{formatPrice p.price}}</p>
+    <p>
+      {{#if (isLowStock p.stock)}}<span class="badge badge-warn">Còn {{p.stock}} sản phẩm</span>
+      {{else}}<span class="badge badge-ok">Còn {{p.stock}} sản phẩm</span>{{/if}}
+    </p>
+    <p>{{orDash p.description}}</p>
+
+    <h2>Thông số</h2>
+    <dl class="specs">
+      <dt>Mã SKU</dt><dd><code>{{p.sku}}</code></dd>
+      <dt>Danh mục</dt><dd>{{p.category_name}}</dd>
+      <dt>Thương hiệu</dt><dd>{{p.brand_name}}</dd>
+      <dt>Kiểu kết nối</dt><dd>{{p.connection_type}}</dd>
+      <dt>Trở kháng</dt><dd>{{#if p.impedance_ohm}}{{p.impedance_ohm}} Ω{{else}}—{{/if}}</dd>
+      <dt>Kích thước driver</dt><dd>{{#if p.driver_size_mm}}{{p.driver_size_mm}} mm{{else}}—{{/if}}</dd>
+      <dt>Đáp tuyến tần số</dt><dd>{{orDash p.frequency_response}}</dd>
+      <dt>Ngày tạo</dt><dd>{{formatDate p.created_at}}</dd>
+      <dt>Cập nhật</dt><dd>{{formatDate p.updated_at}}</dd>
+    </dl>
+  </div>
+</div>
