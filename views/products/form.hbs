@@ -15,7 +15,8 @@
 </div>
 {{/if}}
 
-<form class="card form" action="{{action}}" method="post">
+<form class="card form" action="{{action}}" method="post" enctype="multipart/form-data">
+  <input type="hidden" name="_csrf" value="{{csrfToken}}">
   <div class="form-grid">
     <label>Mã SKU *
       <input type="text" name="sku" value="{{p.sku}}" maxlength="40" required placeholder="VD: SNY-WH1000XM5">
@@ -60,9 +61,15 @@
       <input type="number" name="driver_size_mm" value="{{p.driver_size_mm}}" min="1" step="1" placeholder="VD: 40">
     </label>
 
-    <label class="span-2">Link ảnh (tùy chọn)
-      <input type="url" name="image_url" value="{{p.image_url}}" placeholder="https://...">
+    <label>Tải ảnh lên Cloudinary {{#if cloudinaryReady}}<span class="badge badge-ok">Đã kết nối</span>{{else}}<span class="badge">Chưa cấu hình</span>{{/if}}
+      <input id="image_file" type="file" name="image_file" accept="image/jpeg,image/png,image/webp,image/gif">
+      <span class="muted small">JPG, PNG, WebP hoặc GIF (tối đa 5MB). Nếu chọn file, link bên phải sẽ tự cập nhật theo Cloudinary.</span>
     </label>
+    <label>Hoặc dán link ảnh (tùy chọn)
+      <input type="url" name="image_url" value="{{p.image_url}}" placeholder="https://...">
+      <img id="image-preview" class="image-preview" src="{{p.image_url}}" alt="Xem trước ảnh" {{#unless p.image_url}}hidden{{/unless}}>
+    </label>
+
     <label class="span-2">Mô tả
       <textarea name="description" rows="4" placeholder="Mô tả ngắn về sản phẩm...">{{p.description}}</textarea>
     </label>

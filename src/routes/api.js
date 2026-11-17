@@ -1,17 +1,28 @@
 const express = require('express');
 const db = require('../db');
 const { searchProducts } = require('./products');
+const { getMetrics } = require('../metrics');
 
 const router = express.Router();
 
-// GET /health - Render dùng đường dẫn này để kiểm tra dịch vụ còn sống
+// GET /health - Render và UptimeRobot dùng đường dẫn này để kiểm tra dịch vụ còn sống
 router.get('/health', async (req, res) => {
   try {
     const { rows } = await db.query('SELECT NOW() AS now');
-    res.json({ status: 'ok', database: 'connected', time: rows[0].now });
+    res.json({
+      status: 'ok',
+      database: 'connected',
+      time: rows[0].now,
+      metrics: getMetrics(),
+    });
   } catch (err) {
     res.status(503).json({ status: 'error', database: 'unreachable', message: err.message });
   }
+});
+
+// GET /api/metrics - Thống kê hiệu năng xử lý request
+router.get('/api/metrics', (req, res) => {
+  res.json(getMetrics());
 });
 
 // GET /api/products?q=sony&category=1&page=1 - trả JSON, tiện kiểm thử bằng trình duyệt/Postman/curl

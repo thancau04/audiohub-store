@@ -52,7 +52,13 @@
     </div>
     {{#if latest.length}}
     <table class="table">
-      <thead><tr><th>Sản phẩm</th><th>Hãng</th><th class="num">Giá</th></tr></thead>
+      <thead>
+        <tr>
+          <th>Sản phẩm</th>
+          <th>Hãng</th>
+          <th class="num">Giá</th>
+        </tr>
+      </thead>
       <tbody>
         {{#each latest}}
         <tr>
@@ -78,7 +84,8 @@
         {{#each lowStock}}
         <li>
           <a href="/products/{{id}}">{{name}}</a>
-          {{#if stock}}<span class="badge badge-warn">còn {{stock}}</span>{{else}}<span class="badge badge-err">hết hàng</span>{{/if}}
+          {{#if stock}}<span class="badge badge-warn">còn {{stock}}</span>{{else}}<span class="badge badge-err">hết
+            hàng</span>{{/if}}
         </li>
         {{/each}}
       </ul>

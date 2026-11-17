@@ -1,15 +1,43 @@
 const express = require('express');
+const multer = require('multer');
 const db = require('../db');
+const cloudinary = require('../cloudinary');
+const { requireAuth, requireAdmin, verifyCsrf } = require('../auth');
 
 const router = express.Router();
 
 const PAGE_SIZE = 8;
 const CONNECTION_TYPES = ['Có dây', 'Bluetooth', 'Có dây + Bluetooth', 'Không dây 2.4GHz'];
+const ALLOWED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
 const MESSAGES = {
   created: 'Đã thêm sản phẩm mới.',
   updated: 'Đã cập nhật sản phẩm.',
   deleted: 'Đã xóa sản phẩm.',
 };
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter(req, file, cb) {
+    if (!ALLOWED_MIME.has(file.mimetype)) {
+      return cb(new Error('Chỉ hỗ trợ file ảnh JPG, PNG, WebP hoặc GIF.'));
+    }
+    return cb(null, true);
+  },
+});
+
+// Parse multipart/form-data trước khi verifyCsrf để có req.body._csrf
+function parseProductUpload(req, res, next) {
+  upload.single('image_file')(req, res, (err) => {
+    if (err) {
+      req.uploadError =
+        err.code === 'LIMIT_FILE_SIZE'
+          ? 'File ảnh vượt quá giới hạn 5MB.'
+          : err.message || 'Không thể đọc file ảnh tải lên.';
+    }
+    next();
+  });
+}
 
 const BASE_SELECT = `
   SELECT p.*, c.name AS category_name, b.name AS brand_name
@@ -28,7 +56,6 @@ async function loadLookups() {
   return { categories: categories.rows, brands: brands.rows };
 }
 
-// Đánh dấu "selected" cho các thẻ <option>
 function withSelected(rows, selectedId) {
   return rows.map((r) => ({ ...r, selected: String(r.id) === String(selectedId) }));
 }
@@ -41,7 +68,6 @@ function parseId(raw) {
   return /^\d+$/.test(raw) ? Number(raw) : null;
 }
 
-// Kiểm tra dữ liệu form; trả về { values, errors }
 function validateProduct(body) {
   const str = (v) => (typeof v === 'string' ? v.trim() : '');
   const values = {
@@ -113,6 +139,7 @@ async function renderForm(res, { status = 200, title, action, submitLabel, value
     submitLabel,
     errors,
     p: values,
+    cloudinaryReady: cloudinary.isConfigured(),
     categories: withSelected(categories, values.category_id),
     brands: withSelected(brands, values.brand_id),
     connectionTypes: connectionOptions(values.connection_type),
@@ -125,7 +152,6 @@ const EMPTY_PRODUCT = {
   frequency_response: '', image_url: '', description: '',
 };
 
-// Dùng chung cho trang danh sách và API JSON
 async function searchProducts({ q = '', category = '', page = 1, pageSize = PAGE_SIZE }) {
   const where = [];
   const params = [];
@@ -162,7 +188,6 @@ async function searchProducts({ q = '', category = '', page = 1, pageSize = PAGE
 
 // ---------- Các route ----------
 
-// Danh sách + tìm kiếm + lọc danh mục + phân trang
 router.get('/', async (req, res, next) => {
   try {
     const q = (req.query.q || '').toString().trim().slice(0, 100);
@@ -202,8 +227,7 @@ router.get('/', async (req, res, next) => {
   }
 });
 
-// Form thêm mới
-router.get('/new', async (req, res, next) => {
+router.get('/new', requireAuth, async (req, res, next) => {
   try {
     await renderForm(res, {
       title: 'Thêm sản phẩm',
@@ -216,12 +240,25 @@ router.get('/new', async (req, res, next) => {
   }
 });
 
-// Xử lý thêm mới
-router.post('/', async (req, res, next) => {
-  const { values, errors } = validateProduct(req.body);
+router.post('/', requireAuth, parseProductUpload, verifyCsrf, async (req, res, next) => {
+  const { values, errors } = validateProduct(req.body || {});
+  if (req.uploadError) errors.unshift(req.uploadError);
   const form = { title: 'Thêm sản phẩm', action: '/products', submitLabel: 'Thêm sản phẩm', values };
+
   try {
     if (errors.length) return await renderForm(res, { ...form, status: 400, errors });
+
+    if (req.file) {
+      if (!cloudinary.isConfigured()) {
+        return await renderForm(res, {
+          ...form,
+          status: 400,
+          errors: ['Server chưa cấu hình Cloudinary để tải ảnh lên. Vui lòng dán link ảnh hoặc cấu hình biến môi trường Cloudinary.'],
+        });
+      }
+      const uploaded = await cloudinary.uploadBuffer(req.file.buffer);
+      values.image_url = uploaded.url;
+    }
 
     const { rows } = await db.query(
       `INSERT INTO products
@@ -231,15 +268,14 @@ router.post('/', async (req, res, next) => {
        RETURNING id`,
       toParams(values)
     );
-    res.redirect(`/products/${rows[0].id}?msg=created`);
+    return res.redirect(`/products/${rows[0].id}?msg=created`);
   } catch (err) {
     const message = dbErrorMessage(err);
     if (message) return renderForm(res, { ...form, status: 400, errors: [message] }).catch(next);
-    next(err);
+    return next(err);
   }
 });
 
-// Chi tiết
 router.get('/:id', async (req, res, next) => {
   try {
     const id = parseId(req.params.id);
@@ -256,8 +292,7 @@ router.get('/:id', async (req, res, next) => {
   }
 });
 
-// Form sửa
-router.get('/:id/edit', async (req, res, next) => {
+router.get('/:id/edit', requireAuth, async (req, res, next) => {
   try {
     const id = parseId(req.params.id);
     if (!id) return next();
@@ -279,14 +314,27 @@ router.get('/:id/edit', async (req, res, next) => {
   }
 });
 
-// Xử lý sửa
-router.post('/:id', async (req, res, next) => {
+router.post('/:id', requireAuth, parseProductUpload, verifyCsrf, async (req, res, next) => {
   const id = parseId(req.params.id);
   if (!id) return next();
-  const { values, errors } = validateProduct(req.body);
+  const { values, errors } = validateProduct(req.body || {});
+  if (req.uploadError) errors.unshift(req.uploadError);
   const form = { title: 'Sửa sản phẩm', action: `/products/${id}`, submitLabel: 'Lưu thay đổi', values };
+
   try {
     if (errors.length) return await renderForm(res, { ...form, status: 400, errors });
+
+    if (req.file) {
+      if (!cloudinary.isConfigured()) {
+        return await renderForm(res, {
+          ...form,
+          status: 400,
+          errors: ['Server chưa cấu hình Cloudinary để tải ảnh lên.'],
+        });
+      }
+      const uploaded = await cloudinary.uploadBuffer(req.file.buffer);
+      values.image_url = uploaded.url;
+    }
 
     const result = await db.query(
       `UPDATE products SET
@@ -297,24 +345,31 @@ router.post('/:id', async (req, res, next) => {
       [...toParams(values), id]
     );
     if (!result.rowCount) return next();
-    res.redirect(`/products/${id}?msg=updated`);
+    return res.redirect(`/products/${id}?msg=updated`);
   } catch (err) {
     const message = dbErrorMessage(err);
     if (message) return renderForm(res, { ...form, status: 400, errors: [message] }).catch(next);
-    next(err);
+    return next(err);
   }
 });
 
-// Xóa
-router.post('/:id/delete', async (req, res, next) => {
+// Chỉ Admin được xóa sản phẩm
+router.post('/:id/delete', requireAdmin, verifyCsrf, async (req, res, next) => {
   try {
     const id = parseId(req.params.id);
     if (!id) return next();
     const result = await db.query('DELETE FROM products WHERE id = $1', [id]);
     if (!result.rowCount) return next();
-    res.redirect('/products?msg=deleted');
+    return res.redirect('/products?msg=deleted');
   } catch (err) {
-    next(err);
+    if (err.code === '23503') {
+      return res.status(400).render('error', {
+        title: 'Không thể xóa sản phẩm',
+        code: 400,
+        message: 'Sản phẩm này đã xuất hiện trong đơn hàng nên không thể xóa để giữ lịch sử giao dịch.',
+      });
+    }
+    return next(err);
   }
 });
 

@@ -1,0 +1,90 @@
+<div class="page-head">
+  <div>
+    <h1>Nhập / Xuất kho</h1>
+    <p class="page-sub">Cập nhật tồn kho an toàn bằng transaction PostgreSQL và lưu vết lịch sử.</p>
+  </div>
+</div>
+
+{{#if flash}}<div class="alert alert-ok">{{> icon name="check-circle"}}<span>{{flash}}</span></div>{{/if}}
+{{#if errors.length}}
+<div class="alert alert-err">
+  {{> icon name="alert-circle"}}
+  <div><ul>{{#each errors}}<li>{{this}}</li>{{/each}}</ul></div>
+</div>
+{{/if}}
+
+<div class="grid-inv">
+  <section class="card">
+    <h2>Tạo phiếu điều chỉnh kho</h2>
+    <form class="stack" action="/inventory/adjust" method="post">
+      <input type="hidden" name="_csrf" value="{{csrfToken}}">
+      <label>Sản phẩm *
+        <select name="product_id" required>
+          <option value="">-- Chọn sản phẩm --</option>
+          {{#each products}}
+          <option value="{{id}}" {{#if (eq ../form.product_id id)}}selected{{/if}}>{{name}} ({{sku}} · tồn {{stock}})</option>
+          {{/each}}
+        </select>
+      </label>
+
+      <label>Loại phiếu *
+        <select name="type" required>
+          <option value="IN" {{#if (eq form.type "IN")}}selected{{/if}}>Nhập kho (+)</option>
+          <option value="OUT" {{#if (eq form.type "OUT")}}selected{{/if}}>Xuất kho (-)</option>
+        </select>
+      </label>
+
+      <label>Số lượng *
+        <input type="number" name="quantity" value="{{#if form.quantity}}{{form.quantity}}{{else}}1{{/if}}" min="1" step="1" required>
+      </label>
+
+      <label>Ghi chú
+        <input type="text" name="note" value="{{form.note}}" maxlength="255" placeholder="VD: Nhập lô mới từ nhà phân phối">
+      </label>
+
+      <button class="btn btn-primary" type="submit">{{> icon name="save"}} Xác nhận phiếu</button>
+    </form>
+  </section>
+
+  <section class="card card-flush">
+    <div class="card-head">
+      <h2 class="card-title">Lịch sử biến động kho gần nhất</h2>
+    </div>
+    {{#if movements.length}}
+    <div class="table-scroll">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Loại</th>
+            <th>Sản phẩm</th>
+            <th class="num">SL</th>
+            <th class="num">Tồn sau</th>
+            <th>Ghi chú / Người thực hiện</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each movements}}
+          <tr>
+            <td>
+              {{#if (eq type "IN")}}<span class="badge badge-ok">NHẬP</span>{{else}}<span class="badge badge-warn">XUẤT</span>{{/if}}
+            </td>
+            <td>
+              <a href="/products/{{product_id}}">{{product_name}}</a>
+              <div class="muted small"><code>{{sku}}</code></div>
+            </td>
+            <td class="num">{{quantity}}</td>
+            <td class="num">{{stock_after}}</td>
+            <td>
+              <div>{{orDash note}}</div>
+              <div class="muted small">{{orDash actor_name}} · {{formatDate created_at}}</div>
+            </td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+    {{else}}
+    <p class="empty-text">Chưa có phiếu nhập/xuất nào.</p>
+    {{/if}}
+  </section>
+</div>

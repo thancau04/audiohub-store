@@ -1,0 +1,9 @@
+node_modules
+.env
+.git
+.github
+backups
+*.log
+*.dump
+*.sql.gz
+.DS_Store

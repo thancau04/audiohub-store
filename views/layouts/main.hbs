@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/app.js" defer></script>
 </head>
 
 <body>
@@ -21,10 +22,42 @@
       <nav class="nav">
         <a class="nav-link {{#if (eq navActive "home")}}is-active{{/if}}" href="/">{{> icon name="dashboard"}} Tổng quan</a>
         <a class="nav-link {{#if (eq navActive "products")}}is-active{{/if}}" href="/products">{{> icon name="package"}} Sản phẩm</a>
+        {{#if currentUser}}
+        <a class="nav-link {{#if (eq navActive "inventory")}}is-active{{/if}}" href="/inventory">{{> icon name="warehouse"}} Kho</a>
+        <a class="nav-link {{#if (eq navActive "orders")}}is-active{{/if}}" href="/orders">{{> icon name="shopping-cart"}} Đơn hàng</a>
+        <a class="nav-link {{#if (eq navActive "reports")}}is-active{{/if}}" href="/reports">{{> icon name="bar-chart"}} Báo cáo</a>
+        {{#if isAdmin}}
+        <a class="nav-link nav-admin {{#if (eq navActive "admin")}}is-active{{/if}}" href="/admin/users">{{> icon name="users"}} Nhân viên</a>
+        {{/if}}
         <span class="nav-divider"></span>
-        <a class="btn btn-primary btn-sm" href="/products/new">{{> icon name="plus"}} Thêm sản phẩm</a>
+        <a class="btn btn-primary btn-sm" href="/products/new">{{> icon name="plus"}} Thêm</a>
+        <div class="user-menu">
+          <span class="user-pill" title="{{currentUser.username}}">
+            <span class="role-dot {{#if isAdmin}}is-admin{{/if}}"></span>
+            <span class="user-name">{{currentUser.full_name}}</span>
+            <span class="role-tag">{{currentUser.role}}</span>
+          </span>
+          <form action="/logout" method="post">
+            <input type="hidden" name="_csrf" value="{{csrfToken}}">
+            <button class="btn btn-ghost btn-sm" type="submit" title="Đăng xuất">{{> icon name="log-out"}}</button>
+          </form>
+        </div>
+        {{else}}
+        <span class="nav-divider"></span>
+        <a class="btn btn-primary btn-sm" href="/login">{{> icon name="log-in"}} Đăng nhập</a>
+        {{/if}}
       </nav>
     </div>
+    {{#if currentUser}}
+    <div class="mobile-nav container">
+      <a class="{{#if (eq navActive "home")}}is-active{{/if}}" href="/">Tổng quan</a>
+      <a class="{{#if (eq navActive "products")}}is-active{{/if}}" href="/products">Sản phẩm</a>
+      <a class="{{#if (eq navActive "inventory")}}is-active{{/if}}" href="/inventory">Kho</a>
+      <a class="{{#if (eq navActive "orders")}}is-active{{/if}}" href="/orders">Đơn hàng</a>
+      <a class="{{#if (eq navActive "reports")}}is-active{{/if}}" href="/reports">Báo cáo</a>
+      {{#if isAdmin}}<a class="{{#if (eq navActive "admin")}}is-active{{/if}}" href="/admin/users">Nhân viên</a>{{/if}}
+    </div>
+    {{/if}}
   </header>
 
   <main class="container">

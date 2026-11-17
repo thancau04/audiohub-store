@@ -1,0 +1,99 @@
+<div class="page-head">
+  <div>
+    <h1>Báo cáo doanh thu &amp; kho</h1>
+    <p class="page-sub">Tổng hợp doanh thu bán hàng và xuất dữ liệu CSV cho Excel.</p>
+  </div>
+  <div class="head-actions">
+    <a class="btn" href="/reports/inventory.csv">{{> icon name="download"}} Xuất tồn kho CSV</a>
+    <a class="btn btn-primary" href="/reports/orders.csv">{{> icon name="download"}} Xuất đơn hàng CSV</a>
+  </div>
+</div>
+
+<section class="stats">
+  <div class="stat">
+    <div class="stat-top">
+      <span class="stat-icon">{{> icon name="wallet" sw="2.2"}}</span>
+      <span class="stat-label">Tổng doanh thu</span>
+    </div>
+    <div class="stat-value">{{formatPrice summary.total_revenue}}</div>
+  </div>
+  <div class="stat">
+    <div class="stat-top">
+      <span class="stat-icon">{{> icon name="bar-chart" sw="2.2"}}</span>
+      <span class="stat-label">Doanh thu 7 ngày</span>
+    </div>
+    <div class="stat-value">{{formatPrice summary.revenue_7d}}</div>
+  </div>
+  <div class="stat">
+    <div class="stat-top">
+      <span class="stat-icon">{{> icon name="shopping-cart" sw="2.2"}}</span>
+      <span class="stat-label">Đơn hoàn thành</span>
+    </div>
+    <div class="stat-value">{{formatNumber summary.completed_orders}}</div>
+  </div>
+  <div class="stat">
+    <div class="stat-top">
+      <span class="stat-icon">{{> icon name="warehouse" sw="2.2"}}</span>
+      <span class="stat-label">Phiếu nhập / xuất</span>
+    </div>
+    <div class="stat-value">{{moves.total_in}} / {{moves.total_out}}</div>
+  </div>
+</section>
+
+<div class="grid-2-equal">
+  <section class="card card-flush">
+    <div class="card-head">
+      <h2 class="card-title">Sản phẩm bán chạy</h2>
+    </div>
+    {{#if topProducts.length}}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Sản phẩm</th>
+          <th class="num">Đã bán</th>
+          <th class="num">Doanh thu</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each topProducts}}
+        <tr>
+          <td><a href="/products/{{product_id}}">{{product_name}}</a></td>
+          <td class="num">{{qty_sold}}</td>
+          <td class="num"><strong>{{formatPrice revenue}}</strong></td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+    {{else}}
+    <p class="empty-text">Chưa có dữ liệu bán hàng.</p>
+    {{/if}}
+  </section>
+
+  <section class="card card-flush">
+    <div class="card-head">
+      <h2 class="card-title">Doanh thu 14 ngày gần nhất</h2>
+    </div>
+    {{#if daily.length}}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Ngày</th>
+          <th class="num">Số đơn</th>
+          <th class="num">Doanh thu</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each daily}}
+        <tr>
+          <td>{{day}}</td>
+          <td class="num">{{orders_count}}</td>
+          <td class="num"><strong>{{formatPrice revenue}}</strong></td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+    {{else}}
+    <p class="empty-text">Chưa có đơn hàng trong 14 ngày qua.</p>
+    {{/if}}
+  </section>
+</div>

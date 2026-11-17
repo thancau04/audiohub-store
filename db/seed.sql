@@ -71,3 +71,33 @@ FROM (VALUES
 JOIN categories c ON c.name = v.cat
 JOIN brands b     ON b.name = v.brand
 ON CONFLICT (sku) DO NOTHING;
+
+-- Tài khoản mặc định (mật khẩu được băm bằng scrypt: Admin@123 và Staff@123)
+INSERT INTO users (username, password_hash, full_name, role) VALUES
+  ('admin', '7895d0bc3c3cd7fa17ee0a48989ccc0d:73070f138e4963df4b50a8e91234728fea6a045f44776f2d1aecba53bf118c040d5b791f6a03c83fce47bd4e0fb52792cfbd1fd72ae9b72efaae5a55e5d475f4', 'Quản trị viên', 'admin'),
+  ('staff', '239cdce047bd2d77ce28516897dbee5c:5271a8cc6bb0a835cf4fd94cec9aa9e3a7899ec794f8f05ba4dea182fb3cb0a6e33a57add976edf4a78e23ff8978ef5fae3e095d8c81455ff6eb2e66bc8cb6a9', 'Nhân viên bán hàng', 'staff')
+ON CONFLICT (username) DO NOTHING;
+
+-- Phiếu nhập kho minh họa (chỉ nạp khi bảng còn trống)
+INSERT INTO stock_movements (product_id, user_id, type, quantity, stock_after, note)
+SELECT p.id, u.id, 'IN', 5, p.stock, 'Nhập lô hàng đầu kỳ'
+FROM products p
+CROSS JOIN (SELECT id FROM users WHERE username = 'admin' LIMIT 1) u
+WHERE p.sku IN ('SNY-WH1000XM5', 'ATH-M50X', 'JBL-FLIP6')
+  AND NOT EXISTS (SELECT 1 FROM stock_movements);
+
+-- Đơn hàng minh họa (chỉ nạp khi bảng orders còn trống)
+INSERT INTO orders (order_code, customer_name, customer_phone, total_amount, status, note, created_by)
+SELECT 'DH-202611-001', 'Nguyễn Minh Tuấn', '0901234567', 9880000, 'COMPLETED', 'Khách mua trực tiếp tại quầy', u.id
+FROM users u
+WHERE u.username = 'staff'
+  AND NOT EXISTS (SELECT 1 FROM orders WHERE order_code = 'DH-202611-001');
+
+INSERT INTO order_items (order_id, product_id, product_name, unit_price, quantity, line_total)
+SELECT o.id, p.id, p.name, p.price, v.qty, p.price * v.qty
+FROM orders o
+JOIN (VALUES ('SNY-WH1000XM5', 1), ('MDP-ARIA2', 1)) AS v(sku, qty) ON TRUE
+JOIN products p ON p.sku = v.sku
+WHERE o.order_code = 'DH-202611-001'
+  AND NOT EXISTS (SELECT 1 FROM order_items WHERE order_id = o.id);
+

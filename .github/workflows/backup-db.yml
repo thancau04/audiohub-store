@@ -1,0 +1,38 @@
+name: Backup Database
+
+on:
+  schedule:
+    # Chạy tự động mỗi ngày lúc 02:00 UTC (09:00 giờ Việt Nam)
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Kiểm tra Secret DATABASE_URL
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::error::Chưa khai báo GitHub Secret DATABASE_URL."
+            exit 1
+          fi
+
+      - name: Sao lưu PostgreSQL bằng pg_dump 18
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          mkdir -p backups
+          STAMP=$(date -u +%Y%m%d-%H%M%S)
+          docker run --rm -v "$PWD/backups:/backups" -e DATABASE_URL="$DATABASE_URL" postgres:18-alpine \
+            sh -c 'pg_dump "$DATABASE_URL" --no-owner --no-acl -Fc -f "/backups/audiohub-'"$STAMP"'.dump" && pg_dump "$DATABASE_URL" --no-owner --no-acl | gzip > "/backups/audiohub-'"$STAMP"'.sql.gz"'
+          ls -lh backups/
+
+      - name: Tải file sao lưu lên GitHub Actions Artifacts (lưu 30 ngày)
+        uses: actions/upload-artifact@v4
+        with:
+          name: audiohub-db-backup-${{ github.run_number }}
+          path: backups/*
+          retention-days: 30

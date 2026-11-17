@@ -3,7 +3,9 @@
     <h1>Sản phẩm</h1>
     <p class="page-sub">Quản lý danh mục tai nghe và thiết bị âm thanh.</p>
   </div>
+  {{#if currentUser}}
   <a class="btn btn-primary" href="/products/new">{{> icon name="plus"}} Thêm sản phẩm</a>
+  {{/if}}
 </div>
 
 {{#if flash}}<div class="alert alert-ok">{{> icon name="check-circle"}}<span>{{flash}}</span></div>{{/if}}
@@ -38,7 +40,7 @@
         <th>Kết nối</th>
         <th class="num">Giá</th>
         <th class="num">Tồn</th>
-        <th></th>
+        {{#if currentUser}}<th></th>{{/if}}
       </tr>
     </thead>
     <tbody>
@@ -55,12 +57,17 @@
         <td class="num">
           {{#if (isLowStock stock)}}<span class="badge {{#if stock}}badge-warn{{else}}badge-err{{/if}}">{{stock}}</span>{{else}}{{stock}}{{/if}}
         </td>
+        {{#if ../currentUser}}
         <td class="actions">
           <a class="btn btn-sm" href="/products/{{id}}/edit">{{> icon name="pencil"}} Sửa</a>
-          <form action="/products/{{id}}/delete" method="post" onsubmit="return confirm('Bạn chắc chắn muốn xóa sản phẩm này?');">
+          {{#if ../isAdmin}}
+          <form action="/products/{{id}}/delete" method="post" data-confirm="Bạn chắc chắn muốn xóa sản phẩm này?">
+            <input type="hidden" name="_csrf" value="{{../csrfToken}}">
             <button class="btn btn-sm btn-danger-ghost" type="submit">{{> icon name="trash"}} Xóa</button>
           </form>
+          {{/if}}
         </td>
+        {{/if}}
       </tr>
       {{/each}}
     </tbody>
@@ -77,6 +84,8 @@
 {{else}}
 <div class="card empty">
   <p class="muted">Không tìm thấy sản phẩm nào.</p>
+  {{#if currentUser}}
   <a class="btn btn-primary" href="/products/new">{{> icon name="plus"}} Thêm sản phẩm mới</a>
+  {{/if}}
 </div>
 {{/if}}

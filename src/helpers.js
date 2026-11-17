@@ -23,6 +23,12 @@ module.exports = {
   eq(a, b) {
     return a === b;
   },
+  or(a, b) {
+    return Boolean(a || b);
+  },
+  inc(n) {
+    return Number(n) + 1;
+  },
   // Tồn kho thấp (<= 5) -> hiển thị cảnh báo
   isLowStock(stock) {
     return Number(stock) <= 5;

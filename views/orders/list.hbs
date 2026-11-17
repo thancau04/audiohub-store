@@ -1,0 +1,53 @@
+<div class="page-head">
+  <div>
+    <h1>Đơn hàng</h1>
+    <p class="page-sub">Bán hàng và tự động trừ tồn kho trong một transaction.</p>
+  </div>
+  <a class="btn btn-primary" href="/orders/new">{{> icon name="plus"}} Tạo đơn hàng</a>
+</div>
+
+{{#if orders.length}}
+<div class="table-wrap">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Mã đơn</th>
+        <th>Khách hàng</th>
+        <th class="num">Số lượng</th>
+        <th class="num">Tổng tiền</th>
+        <th>Trạng thái</th>
+        <th>Người tạo</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each orders}}
+      <tr>
+        <td><a href="/orders/{{id}}"><code>{{order_code}}</code></a></td>
+        <td>
+          <strong>{{customer_name}}</strong>
+          {{#if customer_phone}}<div class="muted small">{{customer_phone}}</div>{{/if}}
+        </td>
+        <td class="num">{{total_qty}} sp</td>
+        <td class="num"><strong>{{formatPrice total_amount}}</strong></td>
+        <td>
+          {{#if isCancelled}}<span class="badge badge-err">Đã hủy</span>{{else}}<span class="badge badge-ok">Hoàn thành</span>{{/if}}
+        </td>
+        <td>
+          <div>{{orDash creator_name}}</div>
+          <div class="muted small">{{formatDate created_at}}</div>
+        </td>
+        <td class="actions">
+          <a class="btn btn-sm" href="/orders/{{id}}">Chi tiết</a>
+        </td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</div>
+{{else}}
+<div class="card empty">
+  <p class="muted">Chưa có đơn hàng nào.</p>
+  <a class="btn btn-primary" href="/orders/new">{{> icon name="plus"}} Tạo đơn hàng đầu tiên</a>
+</div>
+{{/if}}

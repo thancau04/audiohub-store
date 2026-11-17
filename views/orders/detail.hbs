@@ -1,0 +1,64 @@
+<div class="page-head">
+  <div>
+    <h1>Đơn hàng <code>{{order.order_code}}</code></h1>
+    <p class="page-sub">Tạo lúc {{formatDate order.created_at}} bởi {{orDash order.creator_name}}</p>
+  </div>
+  <div class="head-actions">
+    <a class="btn btn-ghost" href="/orders">{{> icon name="arrow-left"}} Danh sách đơn</a>
+    {{#if isAdmin}}
+    {{#unless order.isCancelled}}
+    <form action="/orders/{{order.id}}/cancel" method="post" data-confirm="Hủy đơn hàng này và hoàn trả tồn kho?">
+      <input type="hidden" name="_csrf" value="{{csrfToken}}">
+      <button class="btn btn-danger" type="submit">{{> icon name="x"}} Hủy đơn &amp; hoàn kho</button>
+    </form>
+    {{/unless}}
+    {{/if}}
+  </div>
+</div>
+
+{{#if flash}}<div class="alert alert-ok">{{> icon name="check-circle"}}<span>{{flash}}</span></div>{{/if}}
+
+<div class="grid-inv">
+  <section class="card">
+    <h2>Thông tin khách hàng</h2>
+    <dl class="specs">
+      <dt>Khách hàng</dt><dd>{{order.customer_name}}</dd>
+      <dt>Số điện thoại</dt><dd>{{orDash order.customer_phone}}</dd>
+      <dt>Trạng thái</dt>
+      <dd>
+        {{#if order.isCancelled}}<span class="badge badge-err">Đã hủy</span>{{else}}<span class="badge badge-ok">Hoàn thành</span>{{/if}}
+      </dd>
+      <dt>Ghi chú</dt><dd>{{orDash order.note}}</dd>
+      <dt>Tổng thanh toán</dt><dd><strong>{{formatPrice order.total_amount}}</strong></dd>
+    </dl>
+  </section>
+
+  <section class="card card-flush">
+    <div class="card-head">
+      <h2 class="card-title">Chi tiết mặt hàng</h2>
+    </div>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Sản phẩm</th>
+          <th class="num">Đơn giá</th>
+          <th class="num">SL</th>
+          <th class="num">Thành tiền</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each items}}
+        <tr>
+          <td>
+            <a href="/products/{{product_id}}">{{product_name}}</a>
+            {{#if sku}}<div class="muted small"><code>{{sku}}</code></div>{{/if}}
+          </td>
+          <td class="num">{{formatPrice unit_price}}</td>
+          <td class="num">{{quantity}}</td>
+          <td class="num"><strong>{{formatPrice line_total}}</strong></td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </section>
+</div>

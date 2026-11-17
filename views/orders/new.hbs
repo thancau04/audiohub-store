@@ -1,0 +1,63 @@
+<div class="page-head">
+  <div>
+    <h1>Tạo đơn hàng mới</h1>
+    <p class="page-sub">Kiểm tra tồn kho, trừ số lượng và ghi lịch sử kho đồng thời trong một transaction.</p>
+  </div>
+  <a class="btn btn-ghost" href="/orders">{{> icon name="arrow-left"}} Danh sách đơn</a>
+</div>
+
+{{#if errors.length}}
+<div class="alert alert-err">
+  {{> icon name="alert-circle"}}
+  <div><ul>{{#each errors}}<li>{{this}}</li>{{/each}}</ul></div>
+</div>
+{{/if}}
+
+<form class="card form" action="/orders" method="post">
+  <input type="hidden" name="_csrf" value="{{csrfToken}}">
+
+  <div class="form-grid">
+    <label>Tên khách hàng *
+      <input type="text" name="customer_name" value="{{form.customer_name}}" maxlength="120" required placeholder="VD: Nguyễn Văn A">
+    </label>
+    <label>Số điện thoại
+      <input type="text" name="customer_phone" value="{{form.customer_phone}}" maxlength="25" placeholder="VD: 0901234567">
+    </label>
+  </div>
+
+  <div class="mt">
+    <div class="row-head">
+      <h2>Sản phẩm trong đơn</h2>
+      <button id="add-order-row" class="btn btn-sm" type="button">{{> icon name="plus"}} Thêm dòng</button>
+    </div>
+
+    <div id="order-items" class="stack">
+      <div class="order-row">
+        <select name="product_id" required>
+          <option value="" data-price="0">-- Chọn sản phẩm còn hàng --</option>
+          {{#each products}}
+          <option value="{{id}}" data-price="{{price}}">{{name}} ({{sku}}) — {{formatPrice price}} (còn {{stock}})</option>
+          {{/each}}
+        </select>
+        <input type="number" name="quantity" value="1" min="1" step="1" required aria-label="Số lượng">
+        <button class="btn btn-sm btn-danger-ghost" type="button" data-remove-row title="Xóa dòng">{{> icon name="x"}}</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-grid mt">
+    <label class="span-2">Ghi chú đơn hàng
+      <input type="text" name="note" value="{{form.note}}" maxlength="500" placeholder="VD: Giao nhanh nội thành / Bảo hành 12 tháng">
+    </label>
+  </div>
+
+  <div class="order-total-bar">
+    <span class="muted">Tạm tính đơn hàng:</span>
+    <strong id="order-preview-total" class="price">0 ₫</strong>
+  </div>
+
+  <div class="form-actions">
+    <a class="btn btn-ghost" href="/orders">Hủy</a>
+    <button class="btn btn-primary" type="submit">{{> icon name="shopping-cart"}} Xác nhận tạo đơn</button>
+  </div>
+</form>

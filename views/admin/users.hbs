@@ -1,0 +1,80 @@
+<div class="page-head">
+  <div>
+    <h1>Quản lý nhân viên</h1>
+    <p class="page-sub">Phân quyền tài khoản quản trị (admin) và nhân viên bán hàng (staff).</p>
+  </div>
+</div>
+
+{{#if flash}}<div class="alert alert-ok">{{> icon name="check-circle"}}<span>{{flash}}</span></div>{{/if}}
+{{#if error}}<div class="alert alert-err">{{> icon name="alert-circle"}}<span>{{error}}</span></div>{{/if}}
+{{#if errors.length}}
+<div class="alert alert-err">
+  {{> icon name="alert-circle"}}
+  <div><ul>{{#each errors}}<li>{{this}}</li>{{/each}}</ul></div>
+</div>
+{{/if}}
+
+<div class="grid-2-equal">
+  <section class="card card-flush">
+    <div class="card-head">
+      <h2 class="card-title">Danh sách tài khoản</h2>
+    </div>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Tài khoản</th>
+          <th>Vai trò</th>
+          <th>Trạng thái</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each users}}
+        <tr>
+          <td>
+            <strong>{{full_name}}</strong>
+            <div class="muted small"><code>{{username}}</code></div>
+          </td>
+          <td>
+            {{#if (eq role "admin")}}<span class="badge badge-warn">admin</span>{{else}}<span class="badge">staff</span>{{/if}}
+          </td>
+          <td>
+            {{#if is_active}}<span class="badge badge-ok">Hoạt động</span>{{else}}<span class="badge badge-err">Đã khóa</span>{{/if}}
+          </td>
+          <td class="actions">
+            {{#unless isSelf}}
+            <form action="/admin/users/{{id}}/toggle" method="post">
+              <input type="hidden" name="_csrf" value="{{../csrfToken}}">
+              <button class="btn btn-sm" type="submit">{{#if is_active}}Khóa{{else}}Mở khóa{{/if}}</button>
+            </form>
+            {{/unless}}
+          </td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2>Tạo tài khoản mới</h2>
+    <form class="stack" action="/admin/users" method="post">
+      <input type="hidden" name="_csrf" value="{{csrfToken}}">
+      <label>Tên đăng nhập *
+        <input type="text" name="username" value="{{form.username}}" required placeholder="VD: nhanvien2">
+      </label>
+      <label>Họ và tên *
+        <input type="text" name="full_name" value="{{form.full_name}}" required placeholder="VD: Trần Văn An">
+      </label>
+      <label>Mật khẩu (tối thiểu 6 ký tự) *
+        <input type="password" name="password" required minlength="6" placeholder="••••••••">
+      </label>
+      <label>Vai trò *
+        <select name="role">
+          <option value="staff" {{#if (eq form.role "staff")}}selected{{/if}}>Nhân viên (staff)</option>
+          <option value="admin" {{#if (eq form.role "admin")}}selected{{/if}}>Quản trị viên (admin)</option>
+        </select>
+      </label>
+      <button class="btn btn-primary" type="submit">{{> icon name="plus"}} Tạo tài khoản</button>
+    </form>
+  </section>
+</div>

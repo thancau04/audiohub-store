@@ -1,0 +1,37 @@
+<div class="auth-wrap">
+  <div class="card auth-card">
+    <div class="auth-icon">{{> icon name="user"}}</div>
+    <h1>Đăng nhập</h1>
+    <p class="auth-sub">Đăng nhập để quản lý kho, đơn hàng và báo cáo AudioHub.</p>
+
+    {{#if flash}}<div class="alert alert-ok">{{> icon name="check-circle"}}<span>{{flash}}</span></div>{{/if}}
+    {{#if error}}<div class="alert alert-err">{{> icon name="alert-circle"}}<span>{{error}}</span></div>{{/if}}
+
+    <form class="stack" action="/login" method="post">
+      <input type="hidden" name="_csrf" value="{{csrfToken}}">
+      <input type="hidden" name="next" value="{{nextUrl}}">
+
+      <label>Tên đăng nhập
+        <div class="input-icon">
+          {{> icon name="user"}}
+          <input type="text" name="username" value="{{username}}" required autocomplete="username" placeholder="Nhập tên đăng nhập">
+        </div>
+      </label>
+
+      <label>Mật khẩu
+        <div class="input-icon">
+          {{> icon name="lock"}}
+          <input type="password" name="password" required autocomplete="current-password" placeholder="••••••••">
+        </div>
+      </label>
+
+      <button class="btn btn-primary btn-full" type="submit">{{> icon name="log-in"}} Đăng nhập</button>
+    </form>
+
+    <div class="auth-hint">
+      <div><strong>Tài khoản demo (môn học):</strong></div>
+      <div>Admin: <code>admin</code> / <code>Admin@123</code></div>
+      <div>Nhân viên: <code>staff</code> / <code>Staff@123</code></div>
+    </div>
+  </div>
+</div>

@@ -2,10 +2,15 @@
   <h1>{{p.name}}</h1>
   <div class="head-actions">
     <a class="btn btn-ghost" href="/products">{{> icon name="arrow-left"}} Danh sách</a>
+    {{#if currentUser}}
     <a class="btn" href="/products/{{p.id}}/edit">{{> icon name="pencil"}} Sửa</a>
-    <form action="/products/{{p.id}}/delete" method="post" onsubmit="return confirm('Xóa sản phẩm này?');">
+    {{#if isAdmin}}
+    <form action="/products/{{p.id}}/delete" method="post" data-confirm="Xóa sản phẩm này?">
+      <input type="hidden" name="_csrf" value="{{csrfToken}}">
       <button class="btn btn-danger" type="submit">{{> icon name="trash"}} Xóa</button>
     </form>
+    {{/if}}
+    {{/if}}
   </div>
 </div>
 

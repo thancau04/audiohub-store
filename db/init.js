@@ -16,7 +16,9 @@ async function initDatabase(pool, { reset = false } = {}) {
   const seed = fs.readFileSync(path.join(__dirname, 'seed.sql'), 'utf8');
 
   if (reset) {
-    await pool.query('DROP TABLE IF EXISTS products, brands, categories CASCADE;');
+    await pool.query(
+      'DROP TABLE IF EXISTS order_items, orders, stock_movements, user_sessions, users, products, brands, categories CASCADE;'
+    );
     console.log('[DB] Đã xóa các bảng cũ.');
   }
 
