@@ -1,20 +1,26 @@
 <div class="page-head">
-  <h1>Sản phẩm</h1>
-  <a class="btn btn-accent" href="/products/new">+ Thêm sản phẩm</a>
+  <div>
+    <h1>Sản phẩm</h1>
+    <p class="page-sub">Quản lý danh mục tai nghe và thiết bị âm thanh.</p>
+  </div>
+  <a class="btn btn-primary" href="/products/new">{{> icon name="plus"}} Thêm sản phẩm</a>
 </div>
 
-{{#if flash}}<div class="alert alert-ok">{{flash}}</div>{{/if}}
+{{#if flash}}<div class="alert alert-ok">{{> icon name="check-circle"}}<span>{{flash}}</span></div>{{/if}}
 
 <form class="search-bar" action="/products" method="get">
-  <input type="search" name="q" value="{{q}}" placeholder="Tìm theo tên, thương hiệu hoặc mã SKU...">
+  <div class="input-icon">
+    {{> icon name="search"}}
+    <input type="search" name="q" value="{{q}}" placeholder="Tìm theo tên, thương hiệu hoặc mã SKU...">
+  </div>
   <select name="category">
     <option value="">Tất cả danh mục</option>
     {{#each categories}}
     <option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>
     {{/each}}
   </select>
-  <button class="btn" type="submit">Tìm kiếm</button>
-  {{#if hasFilter}}<a class="btn btn-ghost" href="/products">Xóa bộ lọc</a>{{/if}}
+  <button class="btn btn-primary" type="submit">Tìm kiếm</button>
+  {{#if hasFilter}}<a class="btn btn-ghost" href="/products">{{> icon name="x"}} Xóa bộ lọc</a>{{/if}}
 </form>
 
 <p class="muted">
@@ -40,19 +46,19 @@
       <tr>
         <td><code>{{sku}}</code></td>
         <td>
-          <a href="/products/{{id}}"><strong>{{name}}</strong></a>
+          <a href="/products/{{id}}">{{name}}</a>
           <div class="muted small">{{brand_name}}</div>
         </td>
         <td>{{category_name}}</td>
-        <td>{{connection_type}}</td>
+        <td class="muted">{{connection_type}}</td>
         <td class="num">{{formatPrice price}}</td>
         <td class="num">
-          {{#if (isLowStock stock)}}<span class="badge badge-warn">{{stock}}</span>{{else}}{{stock}}{{/if}}
+          {{#if (isLowStock stock)}}<span class="badge {{#if stock}}badge-warn{{else}}badge-err{{/if}}">{{stock}}</span>{{else}}{{stock}}{{/if}}
         </td>
         <td class="actions">
-          <a class="btn btn-sm btn-ghost" href="/products/{{id}}/edit">Sửa</a>
+          <a class="btn btn-sm" href="/products/{{id}}/edit">{{> icon name="pencil"}} Sửa</a>
           <form action="/products/{{id}}/delete" method="post" onsubmit="return confirm('Bạn chắc chắn muốn xóa sản phẩm này?');">
-            <button class="btn btn-sm btn-danger" type="submit">Xóa</button>
+            <button class="btn btn-sm btn-danger-ghost" type="submit">{{> icon name="trash"}} Xóa</button>
           </form>
         </td>
       </tr>
@@ -63,14 +69,14 @@
 
 {{#if totalPages}}
 <nav class="pager">
-  {{#if hasPrev}}<a class="btn btn-ghost btn-sm" href="{{prevUrl}}">← Trước</a>{{/if}}
+  {{#if hasPrev}}<a class="btn btn-sm" href="{{prevUrl}}">{{> icon name="chevron-left"}} Trước</a>{{/if}}
   <span class="muted">Trang {{page}} / {{totalPages}}</span>
-  {{#if hasNext}}<a class="btn btn-ghost btn-sm" href="{{nextUrl}}">Sau →</a>{{/if}}
+  {{#if hasNext}}<a class="btn btn-sm" href="{{nextUrl}}">Sau {{> icon name="chevron-right"}}</a>{{/if}}
 </nav>
 {{/if}}
 {{else}}
 <div class="card empty">
-  <p>Không tìm thấy sản phẩm nào.</p>
-  <a class="btn" href="/products/new">Thêm sản phẩm mới</a>
+  <p class="muted">Không tìm thấy sản phẩm nào.</p>
+  <a class="btn btn-primary" href="/products/new">{{> icon name="plus"}} Thêm sản phẩm mới</a>
 </div>
 {{/if}}

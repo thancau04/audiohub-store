@@ -22,6 +22,14 @@ app.disable('x-powered-by');
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Đánh dấu mục menu đang mở (dùng trong layout để tô sáng link)
+app.use((req, res, next) => {
+  if (req.path === '/') res.locals.navActive = 'home';
+  else if (req.path === '/products/new') res.locals.navActive = 'new';
+  else if (req.path.startsWith('/products')) res.locals.navActive = 'products';
+  next();
+});
+
 // Trang tổng quan
 app.get('/', async (req, res, next) => {
   try {

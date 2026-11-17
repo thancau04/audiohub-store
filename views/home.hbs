@@ -1,32 +1,55 @@
-<h1>Tổng quan cửa hàng</h1>
+<div class="page-head">
+  <div>
+    <h1>Tổng quan cửa hàng</h1>
+    <p class="page-sub">Theo dõi nhanh tồn kho và sản phẩm mới.</p>
+  </div>
+</div>
 
 <section class="stats">
   <div class="stat">
-    <div class="stat-label">Số sản phẩm</div>
+    <div class="stat-top">
+      <span class="stat-icon">{{> icon name="package" sw="2.2"}}</span>
+      <span class="stat-label">Số sản phẩm</span>
+    </div>
     <div class="stat-value">{{formatNumber stats.total_products}}</div>
   </div>
   <div class="stat">
-    <div class="stat-label">Tổng tồn kho (chiếc)</div>
+    <div class="stat-top">
+      <span class="stat-icon">{{> icon name="layers" sw="2.2"}}</span>
+      <span class="stat-label">Tổng tồn kho (chiếc)</span>
+    </div>
     <div class="stat-value">{{formatNumber stats.total_stock}}</div>
   </div>
   <div class="stat">
-    <div class="stat-label">Giá trị tồn kho</div>
+    <div class="stat-top">
+      <span class="stat-icon">{{> icon name="wallet" sw="2.2"}}</span>
+      <span class="stat-label">Giá trị tồn kho</span>
+    </div>
     <div class="stat-value">{{formatPrice stats.stock_value}}</div>
   </div>
   <div class="stat {{#if stats.low_stock}}stat-warn{{/if}}">
-    <div class="stat-label">Sắp hết hàng (≤ 5)</div>
+    <div class="stat-top">
+      <span class="stat-icon">{{> icon name="alert-triangle" sw="2.2"}}</span>
+      <span class="stat-label">Sắp hết hàng (≤ 5)</span>
+    </div>
     <div class="stat-value">{{stats.low_stock}}</div>
   </div>
 </section>
 
 <form class="search-bar" action="/products" method="get">
-  <input type="search" name="q" placeholder="Tìm nhanh theo tên, thương hiệu hoặc mã SKU...">
-  <button class="btn" type="submit">Tìm kiếm</button>
+  <div class="input-icon">
+    {{> icon name="search"}}
+    <input type="search" name="q" placeholder="Tìm nhanh theo tên, thương hiệu hoặc mã SKU...">
+  </div>
+  <button class="btn btn-primary" type="submit">Tìm kiếm</button>
 </form>
 
 <div class="grid-2">
-  <section class="card">
-    <h2>Sản phẩm mới thêm</h2>
+  <section class="card card-flush">
+    <div class="card-head">
+      <h2 class="card-title">Sản phẩm mới thêm</h2>
+      <a class="btn btn-sm" href="/products">Xem tất cả {{> icon name="arrow-right"}}</a>
+    </div>
     {{#if latest.length}}
     <table class="table">
       <thead><tr><th>Sản phẩm</th><th>Hãng</th><th class="num">Giá</th></tr></thead>
@@ -34,37 +57,45 @@
         {{#each latest}}
         <tr>
           <td><a href="/products/{{id}}">{{name}}</a></td>
-          <td>{{brand_name}}</td>
+          <td class="muted">{{brand_name}}</td>
           <td class="num">{{formatPrice price}}</td>
         </tr>
         {{/each}}
       </tbody>
     </table>
     {{else}}
-    <p class="muted">Chưa có sản phẩm nào.</p>
+    <p class="empty-text">Chưa có sản phẩm nào.</p>
     {{/if}}
   </section>
 
-  <section class="card">
-    <h2>Cần nhập thêm hàng</h2>
-    {{#if lowStock.length}}
-    <ul class="list">
-      {{#each lowStock}}
-      <li>
-        <a href="/products/{{id}}">{{name}}</a>
-        <span class="badge badge-warn">còn {{stock}}</span>
-      </li>
-      {{/each}}
-    </ul>
-    {{else}}
-    <p class="muted">Tất cả sản phẩm đều còn đủ hàng.</p>
-    {{/if}}
+  <section class="card card-flush">
+    <div class="card-head">
+      <h2 class="card-title">Cần nhập thêm hàng</h2>
+    </div>
+    <div class="card-body">
+      {{#if lowStock.length}}
+      <ul class="list">
+        {{#each lowStock}}
+        <li>
+          <a href="/products/{{id}}">{{name}}</a>
+          {{#if stock}}<span class="badge badge-warn">còn {{stock}}</span>{{else}}<span class="badge badge-err">hết hàng</span>{{/if}}
+        </li>
+        {{/each}}
+      </ul>
+      {{else}}
+      <p class="empty-text">Tất cả sản phẩm đều còn đủ hàng.</p>
+      {{/if}}
+    </div>
 
-    <h2 class="mt">Theo danh mục</h2>
-    <ul class="list">
-      {{#each byCategory}}
-      <li>{{name}} <span class="badge">{{n}}</span></li>
-      {{/each}}
-    </ul>
+    <div class="card-head">
+      <h2 class="card-title">Theo danh mục</h2>
+    </div>
+    <div class="card-body">
+      <ul class="list">
+        {{#each byCategory}}
+        <li>{{name}} <span class="badge">{{n}}</span></li>
+        {{/each}}
+      </ul>
+    </div>
   </section>
 </div>
